@@ -1,6 +1,23 @@
 import supabase from "../utils/supabase";
 import type { Task, TaskStatus, TaskPriority } from "../models/taskModel";
 
+async function getAuthenticatedUserId(): Promise<string> {
+    const {
+        data: { user },
+        error,
+    } = await supabase.auth.getUser();
+
+    if (error) {
+        throw error;
+    }
+
+    if (!user) {
+        throw new Error("No authenticated user found.");
+    }
+
+    return user.id;
+}
+
 // ─────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────
@@ -134,9 +151,12 @@ export async function createTask(input: CreateTaskInput): Promise<Task> {
         );
     }
 
+    const userId = await getAuthenticatedUserId();
+
     const { data, error } = await supabase
         .from("tasks")
         .insert({
+            user_id: userId,
             task_parent_id: input.task_parent_id ?? null,
             group_parent_id: input.group_parent_id ?? null,
             title: input.title,

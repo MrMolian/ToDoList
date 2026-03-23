@@ -1,6 +1,23 @@
 import type { TaskGroup } from "../models/taskGroupModel";
 import supabase from "../utils/supabase";
 
+async function getAuthenticatedUserId(): Promise<string> {
+    const {
+        data: { user },
+        error,
+    } = await supabase.auth.getUser();
+
+    if (error) {
+        throw error;
+    }
+
+    if (!user) {
+        throw new Error("No authenticated user found.");
+    }
+
+    return user.id;
+}
+
 // ─────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────
@@ -74,9 +91,12 @@ export async function getChildTaskGroups(
 export async function createTaskGroup(
     input: CreateTaskGroupInput,
 ): Promise<TaskGroup> {
+    const userId = await getAuthenticatedUserId();
+
     const { data, error } = await supabase
         .from("task_groups")
         .insert({
+            user_id: userId,
             parent_id: input.parent_id ?? null,
             title: input.title,
             description: input.description ?? null,
