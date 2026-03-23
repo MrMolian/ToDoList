@@ -8,12 +8,13 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import { useEffect, useState } from "react";
 
-import { updateTaskGroup } from "../api/TaskGroup";
+import { createTaskGroup, updateTaskGroup } from "../api/TaskGroup";
 import type { TaskGroup } from "../models/taskGroupModel";
 
 interface TaskGroupEditModalProps {
     open: boolean;
     taskGroup: TaskGroup | null;
+    parentGroupId: string | null;
     onClose: () => void;
     onSaved: (taskGroup: TaskGroup) => void;
 }
@@ -21,6 +22,7 @@ interface TaskGroupEditModalProps {
 export default function TaskGroupEditModal({
     open,
     taskGroup,
+    parentGroupId,
     onClose,
     onSaved,
 }: TaskGroupEditModalProps) {
@@ -29,6 +31,7 @@ export default function TaskGroupEditModal({
     const [color, setColor] = useState("#7b91ff");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const isEditing = taskGroup !== null;
 
     useEffect(() => {
         setTitle(taskGroup?.title ?? "");
@@ -41,19 +44,22 @@ export default function TaskGroupEditModal({
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        if (!taskGroup) {
-            return;
-        }
-
         setIsSaving(true);
         setErrorMessage(null);
 
         try {
-            const updatedTaskGroup = await updateTaskGroup(taskGroup.id, {
+            const payload = {
                 title: title.trim(),
                 description: description.trim() || null,
                 color: color.trim() || null,
-            });
+            };
+
+            const updatedTaskGroup = taskGroup
+                ? await updateTaskGroup(taskGroup.id, payload)
+                : await createTaskGroup({
+                      ...payload,
+                      parent_id: parentGroupId,
+                  });
 
             onSaved(updatedTaskGroup);
             onClose();
@@ -77,7 +83,9 @@ export default function TaskGroupEditModal({
             slotProps={{ paper: { className: "mui-glass-dialog__paper" } }}
         >
             <form onSubmit={handleSubmit}>
-                <DialogTitle>Edit task group</DialogTitle>
+                <DialogTitle>
+                    {isEditing ? "Edit task group" : "Create task group"}
+                </DialogTitle>
                 <DialogContent>
                     <Stack spacing={2.5} sx={{ mt: 0.5 }}>
                         {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
@@ -120,7 +128,13 @@ export default function TaskGroupEditModal({
                         Cancel
                     </Button>
                     <Button type="submit" variant="contained" disabled={isSaving}>
-                        {isSaving ? "Saving..." : "Save group"}
+                        {isSaving
+                            ? isEditing
+                                ? "Saving..."
+                                : "Creating..."
+                            : isEditing
+                              ? "Save group"
+                              : "Create group"}
                     </Button>
                 </DialogActions>
             </form>

@@ -1,3 +1,4 @@
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
 import TaskRoundedIcon from "@mui/icons-material/TaskRounded";
@@ -41,7 +42,9 @@ export default function DashboardPage() {
     const [taskGroups, setTaskGroups] = useState<TaskGroup[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+    const [isTaskGroupModalOpen, setIsTaskGroupModalOpen] = useState(false);
     const [selectedTaskGroup, setSelectedTaskGroup] = useState<TaskGroup | null>(
         null,
     );
@@ -93,6 +96,36 @@ export default function DashboardPage() {
     const currentTaskGroup = path[path.length - 1] ?? null;
     const currentTaskGroupId = currentTaskGroup?.id ?? null;
 
+    function openCreateTaskModal() {
+        setSelectedTask(null);
+        setIsTaskModalOpen(true);
+    }
+
+    function openEditTaskModal(task: Task) {
+        setSelectedTask(task);
+        setIsTaskModalOpen(true);
+    }
+
+    function closeTaskModal() {
+        setIsTaskModalOpen(false);
+        setSelectedTask(null);
+    }
+
+    function openCreateTaskGroupModal() {
+        setSelectedTaskGroup(null);
+        setIsTaskGroupModalOpen(true);
+    }
+
+    function openEditTaskGroupModal(taskGroup: TaskGroup) {
+        setSelectedTaskGroup(taskGroup);
+        setIsTaskGroupModalOpen(true);
+    }
+
+    function closeTaskGroupModal() {
+        setIsTaskGroupModalOpen(false);
+        setSelectedTaskGroup(null);
+    }
+
     const visibleTaskGroups = isValid
         ? taskGroups.filter((taskGroup) => taskGroup.parent_id === currentTaskGroupId)
         : [];
@@ -136,12 +169,28 @@ export default function DashboardPage() {
                         <TaskRoundedIcon fontSize="small" />
                         <span>{visibleTasks.length} tasks</span>
                     </div>
+                    <button
+                        type="button"
+                        className="secondary-button"
+                        onClick={openCreateTaskGroupModal}
+                    >
+                        <AddRoundedIcon fontSize="small" />
+                        New group
+                    </button>
+                    <button
+                        type="button"
+                        className="primary-button"
+                        onClick={openCreateTaskModal}
+                    >
+                        <AddRoundedIcon fontSize="small" />
+                        New task
+                    </button>
                     {currentTaskGroup ? (
                         <button
                             type="button"
                             className="secondary-button"
                             onClick={() => {
-                                setSelectedTaskGroup(currentTaskGroup);
+                                openEditTaskGroupModal(currentTaskGroup);
                             }}
                         >
                             <EditRoundedIcon fontSize="small" />
@@ -188,6 +237,16 @@ export default function DashboardPage() {
                                 <div className="section-label">Task groups</div>
                                 <h2>Nested spaces</h2>
                             </div>
+                            <div className="dashboard-panel__actions">
+                                <button
+                                    type="button"
+                                    className="secondary-button"
+                                    onClick={openCreateTaskGroupModal}
+                                >
+                                    <AddRoundedIcon fontSize="small" />
+                                    Add group
+                                </button>
+                            </div>
                         </div>
 
                         {visibleTaskGroups.length > 0 ? (
@@ -210,7 +269,7 @@ export default function DashboardPage() {
                                             href={href}
                                             childGroupCount={childGroupCount}
                                             taskCount={taskCount}
-                                            onEdit={setSelectedTaskGroup}
+                                            onEdit={openEditTaskGroupModal}
                                         />
                                     );
                                 })}
@@ -228,6 +287,16 @@ export default function DashboardPage() {
                                 <div className="section-label">Tasks</div>
                                 <h2>Direct work items</h2>
                             </div>
+                            <div className="dashboard-panel__actions">
+                                <button
+                                    type="button"
+                                    className="primary-button"
+                                    onClick={openCreateTaskModal}
+                                >
+                                    <AddRoundedIcon fontSize="small" />
+                                    Add task
+                                </button>
+                            </div>
                         </div>
 
                         {visibleTasks.length > 0 ? (
@@ -237,7 +306,7 @@ export default function DashboardPage() {
                                         key={task.id}
                                         task={task}
                                         subTasks={subTasksByParent[task.id] ?? []}
-                                        onEdit={setSelectedTask}
+                                        onEdit={openEditTaskModal}
                                     />
                                 ))}
                             </div>
@@ -251,35 +320,44 @@ export default function DashboardPage() {
             ) : null}
 
             <TaskEditModal
-                open={selectedTask !== null}
+                open={isTaskModalOpen}
                 task={selectedTask}
-                onClose={() => {
-                    setSelectedTask(null);
-                }}
-                onSaved={(updatedTask) => {
-                    setTasks((currentTasks) =>
-                        currentTasks.map((task) =>
-                            task.id === updatedTask.id ? updatedTask : task,
-                        ),
-                    );
+                parentGroupId={currentTaskGroupId}
+                onClose={closeTaskModal}
+                onSaved={(savedTask) => {
+                    setTasks((currentTasks) => {
+                        const alreadyExists = currentTasks.some(
+                            (task) => task.id === savedTask.id,
+                        );
+
+                        if (alreadyExists) {
+                            return currentTasks.map((task) =>
+                                task.id === savedTask.id ? savedTask : task,
+                            );
+                        }
+
+                        return [...currentTasks, savedTask];
+                    });
                 }}
             />
 
             <TaskGroupEditModal
-                open={selectedTaskGroup !== null}
+                open={isTaskGroupModalOpen}
                 taskGroup={selectedTaskGroup}
-                onClose={() => {
-                    setSelectedTaskGroup(null);
-                }}
-                onSaved={(updatedTaskGroup) => {
+                parentGroupId={currentTaskGroupId}
+                onClose={closeTaskGroupModal}
+                onSaved={(savedTaskGroup) => {
                     setTaskGroups((currentTaskGroups) =>
-                        currentTaskGroups.map((taskGroup) =>
-                            taskGroup.id === updatedTaskGroup.id
-                                ? updatedTaskGroup
-                                : taskGroup,
-                        ),
+                        currentTaskGroups.some(
+                            (taskGroup) => taskGroup.id === savedTaskGroup.id,
+                        )
+                            ? currentTaskGroups.map((taskGroup) =>
+                                  taskGroup.id === savedTaskGroup.id
+                                      ? savedTaskGroup
+                                      : taskGroup,
+                              )
+                            : [...currentTaskGroups, savedTaskGroup],
                     );
-                    setSelectedTaskGroup(updatedTaskGroup);
                 }}
             />
         </>

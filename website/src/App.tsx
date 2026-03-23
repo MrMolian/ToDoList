@@ -1,7 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import { useLocation, Navigate, Outlet } from "react-router-dom";
 
-import { useSession } from "./providers/SessionProvider";
+import { useSession } from "./providers/sessionContext";
 
 import BaseLayout from "./components/BaseLayout";
 

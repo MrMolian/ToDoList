@@ -2,7 +2,7 @@ import { Outlet, Link } from "react-router-dom";
 import { useState } from "react";
 
 import supabase from "../utils/supabase";
-import { useSession } from "../providers/SessionProvider";
+import { useSession } from "../providers/sessionContext";
 
 export default function BaseLayout() {
     const { session } = useSession();

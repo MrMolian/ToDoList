@@ -446,6 +446,13 @@ h3 {
   gap: 16px;
 }
 
+.dashboard-panel__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .dashboard-panel__header h2 {
   font-size: 1.65rem;
 }

@@ -9,7 +9,7 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import { useEffect, useState } from "react";
 
-import { updateTask } from "../api/Task";
+import { createTask, updateTask } from "../api/Task";
 import type {
     Task,
     TaskPriority,
@@ -19,6 +19,7 @@ import type {
 interface TaskEditModalProps {
     open: boolean;
     task: Task | null;
+    parentGroupId: string | null;
     onClose: () => void;
     onSaved: (task: Task) => void;
 }
@@ -41,6 +42,7 @@ const PRIORITY_LABELS = {
 export default function TaskEditModal({
     open,
     task,
+    parentGroupId,
     onClose,
     onSaved,
 }: TaskEditModalProps) {
@@ -50,6 +52,7 @@ export default function TaskEditModal({
     const [priority, setPriority] = useState<TaskPriority>("medium");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const isEditing = task !== null;
 
     useEffect(() => {
         setTitle(task?.title ?? "");
@@ -63,20 +66,24 @@ export default function TaskEditModal({
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
 
-        if (!task) {
-            return;
-        }
-
         setIsSaving(true);
         setErrorMessage(null);
 
         try {
-            const updatedTask = await updateTask(task.id, {
+            const payload = {
                 title: title.trim(),
                 description: description.trim() || null,
                 status,
                 priority,
-            });
+            };
+
+            const updatedTask = task
+                ? await updateTask(task.id, payload)
+                : await createTask({
+                      ...payload,
+                      task_parent_id: null,
+                      group_parent_id: parentGroupId,
+                  });
 
             onSaved(updatedTask);
             onClose();
@@ -100,7 +107,7 @@ export default function TaskEditModal({
             slotProps={{ paper: { className: "mui-glass-dialog__paper" } }}
         >
             <form onSubmit={handleSubmit}>
-                <DialogTitle>Edit task</DialogTitle>
+                <DialogTitle>{isEditing ? "Edit task" : "Create task"}</DialogTitle>
                 <DialogContent>
                     <Stack spacing={2.5} sx={{ mt: 0.5 }}>
                         {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
@@ -164,7 +171,13 @@ export default function TaskEditModal({
                         Cancel
                     </Button>
                     <Button type="submit" variant="contained" disabled={isSaving}>
-                        {isSaving ? "Saving..." : "Save task"}
+                        {isSaving
+                            ? isEditing
+                                ? "Saving..."
+                                : "Creating..."
+                            : isEditing
+                              ? "Save task"
+                              : "Create task"}
                     </Button>
                 </DialogActions>
             </form>
