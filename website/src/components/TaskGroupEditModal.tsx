@@ -8,7 +8,11 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import { useEffect, useState } from "react";
 
-import { createTaskGroup, updateTaskGroup } from "../api/TaskGroup";
+import {
+    createTaskGroup,
+    deleteTaskGroup,
+    updateTaskGroup,
+} from "../api/TaskGroup";
 import type { TaskGroup } from "../models/taskGroupModel";
 
 interface TaskGroupEditModalProps {
@@ -17,6 +21,7 @@ interface TaskGroupEditModalProps {
     parentGroupId: string | null;
     onClose: () => void;
     onSaved: (taskGroup: TaskGroup) => void;
+    onDeleted: (taskGroup: TaskGroup) => void;
 }
 
 export default function TaskGroupEditModal({
@@ -25,12 +30,14 @@ export default function TaskGroupEditModal({
     parentGroupId,
     onClose,
     onSaved,
+    onDeleted,
 }: TaskGroupEditModalProps) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [color, setColor] = useState("#7b91ff");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const isEditing = taskGroup !== null;
 
     useEffect(() => {
@@ -39,6 +46,7 @@ export default function TaskGroupEditModal({
         setColor(taskGroup?.color ?? "#7b91ff");
         setErrorMessage(null);
         setIsSaving(false);
+        setIsDeleting(false);
     }, [taskGroup, open]);
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -74,10 +82,41 @@ export default function TaskGroupEditModal({
         }
     }
 
+    async function handleDelete() {
+        if (!taskGroup) {
+            return;
+        }
+
+        const shouldDelete = window.confirm(
+            `Delete "${taskGroup.title}" and all nested task groups and tasks?`,
+        );
+
+        if (!shouldDelete) {
+            return;
+        }
+
+        setIsDeleting(true);
+        setErrorMessage(null);
+
+        try {
+            await deleteTaskGroup(taskGroup.id);
+            onDeleted(taskGroup);
+            onClose();
+        } catch (error) {
+            setErrorMessage(
+                error instanceof Error
+                    ? error.message
+                    : "Task group could not be deleted.",
+            );
+        } finally {
+            setIsDeleting(false);
+        }
+    }
+
     return (
         <Dialog
             open={open}
-            onClose={isSaving ? undefined : onClose}
+            onClose={isSaving || isDeleting ? undefined : onClose}
             fullWidth
             maxWidth="sm"
             slotProps={{ paper: { className: "mui-glass-dialog__paper" } }}
@@ -124,10 +163,26 @@ export default function TaskGroupEditModal({
                     </Stack>
                 </DialogContent>
                 <DialogActions sx={{ px: 3, pb: 3 }}>
-                    <Button onClick={onClose} disabled={isSaving}>
+                    {isEditing ? (
+                        <Button
+                            color="error"
+                            onClick={() => {
+                                void handleDelete();
+                            }}
+                            disabled={isSaving || isDeleting}
+                            sx={{ mr: "auto" }}
+                        >
+                            {isDeleting ? "Deleting..." : "Delete group"}
+                        </Button>
+                    ) : null}
+                    <Button onClick={onClose} disabled={isSaving || isDeleting}>
                         Cancel
                     </Button>
-                    <Button type="submit" variant="contained" disabled={isSaving}>
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        disabled={isSaving || isDeleting}
+                    >
                         {isSaving
                             ? isEditing
                                 ? "Saving..."

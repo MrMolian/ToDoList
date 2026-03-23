@@ -3,7 +3,7 @@ import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
 import TaskRoundedIcon from "@mui/icons-material/TaskRounded";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { getTasks, updateTaskAchieved } from "../api/Task";
 import { getTaskGroups } from "../api/TaskGroup";
@@ -34,7 +34,51 @@ function buildPath(taskGroups: TaskGroup[], pathIds: string[]) {
     return { isValid: true, path };
 }
 
+function collectTaskDescendantIds(tasks: Task[], rootTaskId: string): Set<string> {
+    const ids = new Set<string>([rootTaskId]);
+    let changed = true;
+
+    while (changed) {
+        changed = false;
+
+        for (const task of tasks) {
+            if (task.task_parent_id && ids.has(task.task_parent_id) && !ids.has(task.id)) {
+                ids.add(task.id);
+                changed = true;
+            }
+        }
+    }
+
+    return ids;
+}
+
+function collectTaskGroupDescendantIds(
+    taskGroups: TaskGroup[],
+    rootTaskGroupId: string,
+): Set<string> {
+    const ids = new Set<string>([rootTaskGroupId]);
+    let changed = true;
+
+    while (changed) {
+        changed = false;
+
+        for (const taskGroup of taskGroups) {
+            if (
+                taskGroup.parent_id &&
+                ids.has(taskGroup.parent_id) &&
+                !ids.has(taskGroup.id)
+            ) {
+                ids.add(taskGroup.id);
+                changed = true;
+            }
+        }
+    }
+
+    return ids;
+}
+
 export default function DashboardPage() {
+    const navigate = useNavigate();
     const params = useParams();
     const pathIds = (params["*"] ?? "").split("/").filter(Boolean);
 
@@ -152,6 +196,73 @@ export default function DashboardPage() {
                     ? error.message
                     : "Task completion could not be updated.",
             );
+        }
+    }
+
+    function handleDeletedTask(deletedTask: Task) {
+        setTasks((currentTasks) => {
+            const deletedTaskIds = collectTaskDescendantIds(
+                currentTasks,
+                deletedTask.id,
+            );
+
+            return currentTasks.filter((task) => !deletedTaskIds.has(task.id));
+        });
+        setErrorMessage(null);
+    }
+
+    function handleDeletedTaskGroup(deletedTaskGroup: TaskGroup) {
+        const deletedTaskGroupIds = collectTaskGroupDescendantIds(
+            taskGroups,
+            deletedTaskGroup.id,
+        );
+
+        setTaskGroups((currentTaskGroups) =>
+            currentTaskGroups.filter(
+                (taskGroup) => !deletedTaskGroupIds.has(taskGroup.id),
+            ),
+        );
+
+        setTasks((currentTasks) => {
+            const deletedTaskIds = new Set(
+                currentTasks
+                    .filter(
+                        (task) =>
+                            task.group_parent_id &&
+                            deletedTaskGroupIds.has(task.group_parent_id),
+                    )
+                    .map((task) => task.id),
+            );
+
+            let changed = true;
+
+            while (changed) {
+                changed = false;
+
+                for (const task of currentTasks) {
+                    if (
+                        task.task_parent_id &&
+                        deletedTaskIds.has(task.task_parent_id) &&
+                        !deletedTaskIds.has(task.id)
+                    ) {
+                        deletedTaskIds.add(task.id);
+                        changed = true;
+                    }
+                }
+            }
+
+            return currentTasks.filter((task) => !deletedTaskIds.has(task.id));
+        });
+
+        setErrorMessage(null);
+
+        if (currentTaskGroup?.id === deletedTaskGroup.id) {
+            const parentPathIds = pathIds.slice(0, -1);
+            const nextPath = parentPathIds.length
+                ? `/dashboard/${parentPathIds.join("/")}`
+                : "/dashboard";
+
+            navigate(nextPath, { replace: true });
         }
     }
 
@@ -372,6 +483,7 @@ export default function DashboardPage() {
                         return [...currentTasks, savedTask];
                     });
                 }}
+                onDeleted={handleDeletedTask}
             />
 
             <TaskGroupEditModal
@@ -392,6 +504,7 @@ export default function DashboardPage() {
                             : [...currentTaskGroups, savedTaskGroup],
                     );
                 }}
+                onDeleted={handleDeletedTaskGroup}
             />
         </>
     );

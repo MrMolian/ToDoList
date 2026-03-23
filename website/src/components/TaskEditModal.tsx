@@ -9,7 +9,7 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import { useEffect, useState } from "react";
 
-import { createTask, updateTask } from "../api/Task";
+import { createTask, deleteTask, updateTask } from "../api/Task";
 import type {
     Task,
     TaskPriority,
@@ -22,6 +22,7 @@ interface TaskEditModalProps {
     parentTask: Task | null;
     onClose: () => void;
     onSaved: (task: Task) => void;
+    onDeleted: (task: Task) => void;
 }
 
 const TASK_PRIORITIES: TaskPriority[] = ["low", "medium", "high"];
@@ -39,12 +40,14 @@ export default function TaskEditModal({
     parentTask,
     onClose,
     onSaved,
+    onDeleted,
 }: TaskEditModalProps) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [priority, setPriority] = useState<TaskPriority>("medium");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const isEditing = task !== null;
     const isCreatingSubTask = !isEditing && parentTask !== null;
 
@@ -54,6 +57,7 @@ export default function TaskEditModal({
         setPriority(task?.priority ?? "medium");
         setErrorMessage(null);
         setIsSaving(false);
+        setIsDeleting(false);
     }, [task, open]);
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -91,10 +95,41 @@ export default function TaskEditModal({
         }
     }
 
+    async function handleDelete() {
+        if (!task) {
+            return;
+        }
+
+        const shouldDelete = window.confirm(
+            `Delete "${task.title}" and its subtasks?`,
+        );
+
+        if (!shouldDelete) {
+            return;
+        }
+
+        setIsDeleting(true);
+        setErrorMessage(null);
+
+        try {
+            await deleteTask(task.id);
+            onDeleted(task);
+            onClose();
+        } catch (error) {
+            setErrorMessage(
+                error instanceof Error
+                    ? error.message
+                    : "Task could not be deleted.",
+            );
+        } finally {
+            setIsDeleting(false);
+        }
+    }
+
     return (
         <Dialog
             open={open}
-            onClose={isSaving ? undefined : onClose}
+            onClose={isSaving || isDeleting ? undefined : onClose}
             fullWidth
             maxWidth="sm"
             slotProps={{ paper: { className: "mui-glass-dialog__paper" } }}
@@ -159,10 +194,26 @@ export default function TaskEditModal({
                     </Stack>
                 </DialogContent>
                 <DialogActions sx={{ px: 3, pb: 3 }}>
-                    <Button onClick={onClose} disabled={isSaving}>
+                    {isEditing ? (
+                        <Button
+                            color="error"
+                            onClick={() => {
+                                void handleDelete();
+                            }}
+                            disabled={isSaving || isDeleting}
+                            sx={{ mr: "auto" }}
+                        >
+                            {isDeleting ? "Deleting..." : "Delete task"}
+                        </Button>
+                    ) : null}
+                    <Button onClick={onClose} disabled={isSaving || isDeleting}>
                         Cancel
                     </Button>
-                    <Button type="submit" variant="contained" disabled={isSaving}>
+                    <Button
+                        type="submit"
+                        variant="contained"
+                        disabled={isSaving || isDeleting}
+                    >
                         {isSaving
                             ? isEditing
                                 ? "Saving..."
