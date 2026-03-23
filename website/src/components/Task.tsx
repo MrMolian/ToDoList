@@ -1,5 +1,7 @@
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import RadioButtonUncheckedRoundedIcon from "@mui/icons-material/RadioButtonUncheckedRounded";
 
 import type { Task } from "../models/taskModel";
 import SubTask from "./SubTask";
@@ -9,13 +11,9 @@ interface TaskCardProps {
     subTasks: Task[];
     onEdit: (task: Task) => void;
     onAddSubTask: (task: Task) => void;
+    onToggleAchieved: (task: Task) => void;
+    onToggleSubTaskAchieved: (task: Task) => void;
 }
-
-const STATUS_LABELS = {
-    todo: "To do",
-    in_progress: "In progress",
-    done: "Done",
-} as const;
 
 const PRIORITY_LABELS = {
     low: "Low",
@@ -28,15 +26,35 @@ export default function TaskCard({
     subTasks,
     onEdit,
     onAddSubTask,
+    onToggleAchieved,
+    onToggleSubTaskAchieved,
 }: TaskCardProps) {
     return (
-        <article className="glass-card task-card">
+        <article
+            className={`glass-card task-card ${task.achieved ? "task-card--achieved" : ""}`}
+        >
             <div className="task-card__header">
                 <div>
                     <div className="task-card__badges">
-                        <span className={`status-pill status-pill--${task.status}`}>
-                            {STATUS_LABELS[task.status]}
-                        </span>
+                        <button
+                            type="button"
+                            className={`tick-button ${task.achieved ? "tick-button--achieved" : ""}`}
+                            onClick={() => {
+                                onToggleAchieved(task);
+                            }}
+                            aria-label={
+                                task.achieved
+                                    ? `Mark ${task.title} as not achieved`
+                                    : `Mark ${task.title} as achieved`
+                            }
+                        >
+                            {task.achieved ? (
+                                <CheckCircleRoundedIcon fontSize="small" />
+                            ) : (
+                                <RadioButtonUncheckedRoundedIcon fontSize="small" />
+                            )}
+                            <span>{task.achieved ? "Achieved" : "Pending"}</span>
+                        </button>
                         <span
                             className={`priority-pill priority-pill--${task.priority}`}
                         >
@@ -82,7 +100,11 @@ export default function TaskCard({
                     </div>
                     <div className="task-card__subtask-list">
                         {subTasks.slice(0, 3).map((subTask) => (
-                            <SubTask key={subTask.id} task={subTask} />
+                            <SubTask
+                                key={subTask.id}
+                                task={subTask}
+                                onToggleAchieved={onToggleSubTaskAchieved}
+                            />
                         ))}
                     </div>
                 </div>

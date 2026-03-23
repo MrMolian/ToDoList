@@ -1,5 +1,5 @@
 import supabase from "../utils/supabase";
-import type { Task, TaskStatus, TaskPriority } from "../models/taskModel";
+import type { Task, TaskPriority } from "../models/taskModel";
 
 async function getAuthenticatedUserId(): Promise<string> {
     const {
@@ -28,7 +28,7 @@ export type CreateTaskInput = Pick<
     | "task_parent_id"
     | "group_parent_id"
     | "description"
-    | "status"
+    | "achieved"
     | "priority"
 >;
 
@@ -37,7 +37,7 @@ export type UpdateTaskInput = Partial<
         Task,
         | "title"
         | "description"
-        | "status"
+        | "achieved"
         | "priority"
         | "task_parent_id"
         | "group_parent_id"
@@ -121,13 +121,15 @@ export async function getRootTasks(): Promise<Task[]> {
 }
 
 /**
- * Fetch tasks filtered by status.
+ * Fetch tasks filtered by completion state.
  */
-export async function getTasksByStatus(status: TaskStatus): Promise<Task[]> {
+export async function getTasksByAchieved(
+    achieved: boolean,
+): Promise<Task[]> {
     const { data, error } = await supabase
         .from("tasks")
         .select("*")
-        .eq("status", status)
+        .eq("achieved", achieved)
         .order("created_at", { ascending: true });
 
     if (error) throw error;
@@ -161,7 +163,7 @@ export async function createTask(input: CreateTaskInput): Promise<Task> {
             group_parent_id: input.group_parent_id ?? null,
             title: input.title,
             description: input.description ?? null,
-            status: input.status ?? "todo",
+            achieved: input.achieved ?? false,
             priority: input.priority ?? "medium",
         })
         .select()
@@ -205,13 +207,13 @@ export async function updateTask(
 }
 
 /**
- * Convenience helper — update only the status of a task.
+ * Convenience helper — update only the completion state of a task.
  */
-export async function updateTaskStatus(
+export async function updateTaskAchieved(
     id: string,
-    status: TaskStatus,
+    achieved: boolean,
 ): Promise<Task> {
-    return updateTask(id, { status });
+    return updateTask(id, { achieved });
 }
 
 /**

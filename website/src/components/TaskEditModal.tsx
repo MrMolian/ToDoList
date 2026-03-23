@@ -13,7 +13,6 @@ import { createTask, updateTask } from "../api/Task";
 import type {
     Task,
     TaskPriority,
-    TaskStatus,
 } from "../models/taskModel";
 
 interface TaskEditModalProps {
@@ -25,14 +24,7 @@ interface TaskEditModalProps {
     onSaved: (task: Task) => void;
 }
 
-const TASK_STATUSES: TaskStatus[] = ["todo", "in_progress", "done"];
 const TASK_PRIORITIES: TaskPriority[] = ["low", "medium", "high"];
-
-const STATUS_LABELS = {
-    todo: "To do",
-    in_progress: "In progress",
-    done: "Done",
-} as const;
 
 const PRIORITY_LABELS = {
     low: "Low",
@@ -50,7 +42,6 @@ export default function TaskEditModal({
 }: TaskEditModalProps) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
-    const [status, setStatus] = useState<TaskStatus>("todo");
     const [priority, setPriority] = useState<TaskPriority>("medium");
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
@@ -60,7 +51,6 @@ export default function TaskEditModal({
     useEffect(() => {
         setTitle(task?.title ?? "");
         setDescription(task?.description ?? "");
-        setStatus(task?.status ?? "todo");
         setPriority(task?.priority ?? "medium");
         setErrorMessage(null);
         setIsSaving(false);
@@ -76,7 +66,6 @@ export default function TaskEditModal({
             const payload = {
                 title: title.trim(),
                 description: description.trim() || null,
-                status,
                 priority,
             };
 
@@ -84,6 +73,7 @@ export default function TaskEditModal({
                 ? await updateTask(task.id, payload)
                 : await createTask({
                       ...payload,
+                      achieved: false,
                       task_parent_id: parentTask?.id ?? null,
                       group_parent_id: parentTask ? null : parentGroupId,
                   });
@@ -150,22 +140,6 @@ export default function TaskEditModal({
                             multiline
                             minRows={3}
                         />
-
-                        <TextField
-                            select
-                            label="Status"
-                            value={status}
-                            onChange={(event) => {
-                                setStatus(event.target.value as TaskStatus);
-                            }}
-                            fullWidth
-                        >
-                            {TASK_STATUSES.map((value) => (
-                                <MenuItem key={value} value={value}>
-                                    {STATUS_LABELS[value]}
-                                </MenuItem>
-                            ))}
-                        </TextField>
 
                         <TextField
                             select

@@ -5,7 +5,7 @@ import TaskRoundedIcon from "@mui/icons-material/TaskRounded";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import { getTasks } from "../api/Task";
+import { getTasks, updateTaskAchieved } from "../api/Task";
 import { getTaskGroups } from "../api/TaskGroup";
 import Breadcrumbs from "../components/Breadcrumbs";
 import TaskCard from "../components/Task";
@@ -134,6 +134,25 @@ export default function DashboardPage() {
     function closeTaskGroupModal() {
         setIsTaskGroupModalOpen(false);
         setSelectedTaskGroup(null);
+    }
+
+    async function handleToggleTaskAchieved(task: Task) {
+        try {
+            const updatedTask = await updateTaskAchieved(task.id, !task.achieved);
+
+            setTasks((currentTasks) =>
+                currentTasks.map((candidate) =>
+                    candidate.id === updatedTask.id ? updatedTask : candidate,
+                ),
+            );
+            setErrorMessage(null);
+        } catch (error) {
+            setErrorMessage(
+                error instanceof Error
+                    ? error.message
+                    : "Task completion could not be updated.",
+            );
+        }
     }
 
     const visibleTaskGroups = isValid
@@ -318,6 +337,8 @@ export default function DashboardPage() {
                                         subTasks={subTasksByParent[task.id] ?? []}
                                         onEdit={openEditTaskModal}
                                         onAddSubTask={openCreateSubTaskModal}
+                                        onToggleAchieved={handleToggleTaskAchieved}
+                                        onToggleSubTaskAchieved={handleToggleTaskAchieved}
                                     />
                                 ))}
                             </div>
