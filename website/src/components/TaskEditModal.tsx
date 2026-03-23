@@ -20,6 +20,7 @@ interface TaskEditModalProps {
     open: boolean;
     task: Task | null;
     parentGroupId: string | null;
+    parentTask: Task | null;
     onClose: () => void;
     onSaved: (task: Task) => void;
 }
@@ -43,6 +44,7 @@ export default function TaskEditModal({
     open,
     task,
     parentGroupId,
+    parentTask,
     onClose,
     onSaved,
 }: TaskEditModalProps) {
@@ -53,6 +55,7 @@ export default function TaskEditModal({
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const isEditing = task !== null;
+    const isCreatingSubTask = !isEditing && parentTask !== null;
 
     useEffect(() => {
         setTitle(task?.title ?? "");
@@ -81,8 +84,8 @@ export default function TaskEditModal({
                 ? await updateTask(task.id, payload)
                 : await createTask({
                       ...payload,
-                      task_parent_id: null,
-                      group_parent_id: parentGroupId,
+                      task_parent_id: parentTask?.id ?? null,
+                      group_parent_id: parentTask ? null : parentGroupId,
                   });
 
             onSaved(updatedTask);
@@ -107,10 +110,25 @@ export default function TaskEditModal({
             slotProps={{ paper: { className: "mui-glass-dialog__paper" } }}
         >
             <form onSubmit={handleSubmit}>
-                <DialogTitle>{isEditing ? "Edit task" : "Create task"}</DialogTitle>
+                <DialogTitle>
+                    {isEditing
+                        ? "Edit task"
+                        : isCreatingSubTask
+                          ? "Create subtask"
+                          : "Create task"}
+                </DialogTitle>
                 <DialogContent>
                     <Stack spacing={2.5} sx={{ mt: 0.5 }}>
                         {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
+
+                        {isCreatingSubTask ? (
+                            <TextField
+                                label="Parent task"
+                                value={parentTask.title}
+                                fullWidth
+                                disabled
+                            />
+                        ) : null}
 
                         <TextField
                             label="Title"
@@ -177,7 +195,9 @@ export default function TaskEditModal({
                                 : "Creating..."
                             : isEditing
                               ? "Save task"
-                              : "Create task"}
+                              : isCreatingSubTask
+                                ? "Create subtask"
+                                : "Create task"}
                     </Button>
                 </DialogActions>
             </form>

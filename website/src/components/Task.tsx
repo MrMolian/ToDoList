@@ -1,3 +1,4 @@
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
 
 import type { Task } from "../models/taskModel";
@@ -7,6 +8,7 @@ interface TaskCardProps {
     task: Task;
     subTasks: Task[];
     onEdit: (task: Task) => void;
+    onAddSubTask: (task: Task) => void;
 }
 
 const STATUS_LABELS = {
@@ -21,7 +23,12 @@ const PRIORITY_LABELS = {
     high: "High",
 } as const;
 
-export default function TaskCard({ task, subTasks, onEdit }: TaskCardProps) {
+export default function TaskCard({
+    task,
+    subTasks,
+    onEdit,
+    onAddSubTask,
+}: TaskCardProps) {
     return (
         <article className="glass-card task-card">
             <div className="task-card__header">
@@ -54,6 +61,19 @@ export default function TaskCard({ task, subTasks, onEdit }: TaskCardProps) {
             <p className="task-card__description">
                 {task.description || "No additional notes for this task yet."}
             </p>
+
+            <div className="task-card__actions">
+                <button
+                    type="button"
+                    className="secondary-button task-card__action"
+                    onClick={() => {
+                        onAddSubTask(task);
+                    }}
+                >
+                    <AddRoundedIcon fontSize="small" />
+                    Add subtask
+                </button>
+            </div>
 
             {subTasks.length > 0 ? (
                 <div className="task-card__subtasks">

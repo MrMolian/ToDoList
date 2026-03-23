@@ -43,6 +43,7 @@ export default function DashboardPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+    const [subTaskParent, setSubTaskParent] = useState<Task | null>(null);
     const [selectedTask, setSelectedTask] = useState<Task | null>(null);
     const [isTaskGroupModalOpen, setIsTaskGroupModalOpen] = useState(false);
     const [selectedTaskGroup, setSelectedTaskGroup] = useState<TaskGroup | null>(
@@ -98,17 +99,26 @@ export default function DashboardPage() {
 
     function openCreateTaskModal() {
         setSelectedTask(null);
+        setSubTaskParent(null);
         setIsTaskModalOpen(true);
     }
 
     function openEditTaskModal(task: Task) {
         setSelectedTask(task);
+        setSubTaskParent(null);
+        setIsTaskModalOpen(true);
+    }
+
+    function openCreateSubTaskModal(task: Task) {
+        setSelectedTask(null);
+        setSubTaskParent(task);
         setIsTaskModalOpen(true);
     }
 
     function closeTaskModal() {
         setIsTaskModalOpen(false);
         setSelectedTask(null);
+        setSubTaskParent(null);
     }
 
     function openCreateTaskGroupModal() {
@@ -307,6 +317,7 @@ export default function DashboardPage() {
                                         task={task}
                                         subTasks={subTasksByParent[task.id] ?? []}
                                         onEdit={openEditTaskModal}
+                                        onAddSubTask={openCreateSubTaskModal}
                                     />
                                 ))}
                             </div>
@@ -323,6 +334,7 @@ export default function DashboardPage() {
                 open={isTaskModalOpen}
                 task={selectedTask}
                 parentGroupId={currentTaskGroupId}
+                parentTask={subTaskParent}
                 onClose={closeTaskModal}
                 onSaved={(savedTask) => {
                     setTasks((currentTasks) => {
