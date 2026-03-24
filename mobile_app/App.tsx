@@ -1,20 +1,30 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StatusBar } from "expo-status-bar";
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+import AuthScreen from "./src/screens/AuthScreen";
+import DashboardScreen from "./src/screens/DashboardScreen";
+import LoadingScreen from "./src/screens/LoadingScreen";
+import MasterProvider from "./src/providers/MasterProvider";
+import { useSession } from "./src/providers/sessionContext";
+
+function Root() {
+    const { session, loading } = useSession();
+
+    if (loading) {
+        return <LoadingScreen status="Checking session" />;
+    }
+
+    if (!session) {
+        return <AuthScreen />;
+    }
+
+    return <DashboardScreen />;
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default function App() {
+    return (
+        <MasterProvider>
+            <StatusBar style="dark" />
+            <Root />
+        </MasterProvider>
+    );
+}

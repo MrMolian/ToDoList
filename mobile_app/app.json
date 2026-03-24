@@ -2,6 +2,7 @@
   "expo": {
     "name": "mobile_app",
     "slug": "mobile_app",
+    "scheme": "todoapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -12,7 +13,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.moaadb.todolist"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,10 +23,16 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.moaadb.todolist"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "0c6f9441-02af-4ccd-889e-9748aac79b80"
+      }
     }
   }
 }
