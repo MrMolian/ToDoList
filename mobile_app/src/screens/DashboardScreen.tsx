@@ -420,54 +420,6 @@ export default function DashboardScreen() {
                     </View>
                 </View>
 
-                <View style={styles.hero}>
-                    <View style={styles.heroCopy}>
-                        <Text style={styles.sectionLabel}>Dashboard</Text>
-                        <Text style={styles.heroTitle}>
-                            {currentTaskGroup?.title ?? "Root workspace"}
-                        </Text>
-                        <Text style={styles.heroDescription}>
-                            {currentTaskGroup?.description ||
-                                "Move through task groups from the root path and keep the visible tasks scoped to the current workspace."}
-                        </Text>
-                    </View>
-
-                    <View style={styles.heroMeta}>
-                        <View style={styles.stat}>
-                            <MaterialIcons
-                                name="folder"
-                                size={16}
-                                color={palette.textMuted}
-                            />
-                            <Text style={styles.statText}>
-                                {visibleTaskGroups.length} groups
-                            </Text>
-                        </View>
-
-                        <View style={styles.stat}>
-                            <MaterialIcons
-                                name="task-alt"
-                                size={16}
-                                color={palette.textMuted}
-                            />
-                            <Text style={styles.statText}>{visibleTasks.length} tasks</Text>
-                        </View>
-
-                        <Pressable
-                            onPress={openCreateTaskGroupModal}
-                            style={styles.secondaryButton}
-                        >
-                            <MaterialIcons name="add" size={18} color={palette.textMain} />
-                            <Text style={styles.secondaryButtonText}>New group</Text>
-                        </Pressable>
-
-                        <Pressable onPress={openCreateTaskModal} style={styles.primaryButton}>
-                            <MaterialIcons name="add" size={18} color={palette.white} />
-                            <Text style={styles.primaryButtonText}>New task</Text>
-                        </Pressable>
-                    </View>
-                </View>
-
                 <View style={styles.panel}>
                     <Breadcrumbs
                         path={path}
@@ -747,54 +699,12 @@ const styles = StyleSheet.create({
     profileEmail: {
         color: palette.textMuted,
     },
-    hero: {
-        gap: 20,
-        padding: 24,
-        borderRadius: 24,
-        backgroundColor: palette.surfaceStrong,
-        borderWidth: 1,
-        borderColor: palette.borderStrong,
-    },
-    heroCopy: {
-        gap: 10,
-    },
     sectionLabel: {
         color: palette.textSoft,
         fontSize: 12,
         fontWeight: "800",
         letterSpacing: 1.2,
         textTransform: "uppercase",
-    },
-    heroTitle: {
-        color: palette.textMain,
-        fontSize: 36,
-        lineHeight: 36,
-        fontWeight: "800",
-        letterSpacing: -1.4,
-    },
-    heroDescription: {
-        color: palette.textMuted,
-        lineHeight: 24,
-    },
-    heroMeta: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        gap: 12,
-    },
-    stat: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
-        minHeight: 42,
-        paddingHorizontal: 14,
-        borderRadius: 12,
-        backgroundColor: palette.surface,
-        borderWidth: 1,
-        borderColor: palette.border,
-    },
-    statText: {
-        color: palette.textMuted,
-        fontWeight: "700",
     },
     panel: {
         gap: 18,

@@ -16,12 +16,6 @@ interface TaskCardProps {
     onDeleteSubTask: (task: Task) => Promise<void>;
 }
 
-const priorityLevels = {
-    low: 1,
-    medium: 2,
-    high: 3,
-} as const;
-
 export default function TaskCard({
     task,
     subTasks,
@@ -61,45 +55,9 @@ export default function TaskCard({
                             >
                                 {task.title}
                             </Text>
-                            <View style={styles.priorityDots}>
-                                {Array.from({ length: 3 }, (_, index) => {
-                                    const filled = index < priorityLevels[task.priority];
-                                    const isSecond = index === 1;
-                                    const isThird = index === 2;
-
-                                    return (
-                                        <View
-                                            key={index}
-                                            style={[
-                                                styles.priorityDot,
-                                                filled
-                                                    ? isThird
-                                                        ? styles.priorityDotHigh
-                                                        : isSecond
-                                                          ? styles.priorityDotMedium
-                                                          : styles.priorityDotLow
-                                                    : null,
-                                            ]}
-                                        />
-                                    );
-                                })}
-                            </View>
                         </View>
 
                         <View style={styles.controls}>
-                            <Pressable
-                                onPress={() => {
-                                    onAddSubTask(task);
-                                }}
-                                style={styles.iconButton}
-                            >
-                                <MaterialIcons
-                                    name="task-alt"
-                                    size={18}
-                                    color={palette.textMain}
-                                />
-                            </Pressable>
-
                             <Pressable
                                 onPress={() => {
                                     onEdit(task);
@@ -132,6 +90,22 @@ export default function TaskCard({
 
             {isExpanded ? (
                 <View style={styles.details}>
+                    <View style={styles.detailsActions}>
+                        <Pressable
+                            onPress={() => {
+                                onAddSubTask(task);
+                            }}
+                            style={styles.secondaryButton}
+                        >
+                            <MaterialIcons
+                                name="task-alt"
+                                size={18}
+                                color={palette.textMain}
+                            />
+                            <Text style={styles.secondaryButtonText}>Subtask</Text>
+                        </Pressable>
+                    </View>
+
                     <Text
                         style={[
                             styles.description,
@@ -206,7 +180,6 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: "row",
         alignItems: "center",
-        gap: 10,
     },
     title: {
         flex: 1,
@@ -218,30 +191,6 @@ const styles = StyleSheet.create({
     titleAchieved: {
         textDecorationLine: "line-through",
         opacity: 0.72,
-    },
-    priorityDots: {
-        flexDirection: "row",
-        gap: 6,
-    },
-    priorityDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 999,
-        borderWidth: 1,
-        borderColor: palette.borderStrong,
-        backgroundColor: "transparent",
-    },
-    priorityDotLow: {
-        borderColor: palette.success,
-        backgroundColor: palette.success,
-    },
-    priorityDotMedium: {
-        borderColor: palette.warning,
-        backgroundColor: palette.warning,
-    },
-    priorityDotHigh: {
-        borderColor: palette.danger,
-        backgroundColor: palette.danger,
     },
     controls: {
         flexDirection: "row",
@@ -262,6 +211,10 @@ const styles = StyleSheet.create({
         gap: 14,
         marginTop: 14,
         paddingLeft: 36,
+    },
+    detailsActions: {
+        flexDirection: "row",
+        gap: 10,
     },
     description: {
         color: palette.textMuted,
@@ -285,6 +238,22 @@ const styles = StyleSheet.create({
         fontWeight: "700",
         letterSpacing: 1.1,
         textTransform: "uppercase",
+    },
+    secondaryButton: {
+        alignSelf: "flex-start",
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+        paddingHorizontal: 14,
+        minHeight: 40,
+        borderRadius: 10,
+        backgroundColor: palette.surface,
+        borderWidth: 1,
+        borderColor: palette.border,
+    },
+    secondaryButtonText: {
+        color: palette.textMain,
+        fontWeight: "700",
     },
     emptyText: {
         color: palette.textSoft,
