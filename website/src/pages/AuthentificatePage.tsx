@@ -1,5 +1,6 @@
 import GoogleIcon from "@mui/icons-material/Google";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import { useState } from "react";
 
 import { logInWithGoogle } from "../api/Auth";
@@ -7,6 +8,7 @@ import { logInWithGoogle } from "../api/Auth";
 export default function AuthentificatePage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const mobileAppDownloadUrl = import.meta.env.VITE_MOBILE_APP_DOWNLOAD_URL;
 
     async function handleGoogleLogin() {
         setIsSubmitting(true);
@@ -37,18 +39,39 @@ export default function AuthentificatePage() {
                     Sign in with Google to access your tasks.
                 </p>
 
-                <button
-                    type="button"
-                    className="primary-button auth-page__action"
-                    onClick={() => {
-                        void handleGoogleLogin();
-                    }}
-                    disabled={isSubmitting}
-                >
-                    <GoogleIcon fontSize="small" />
-                    {isSubmitting ? "Redirecting..." : "Continue with Google"}
-                    <ArrowForwardRoundedIcon fontSize="small" />
-                </button>
+                <div className="auth-page__actions">
+                    <button
+                        type="button"
+                        className="primary-button auth-page__action"
+                        onClick={() => {
+                            void handleGoogleLogin();
+                        }}
+                        disabled={isSubmitting}
+                    >
+                        <GoogleIcon fontSize="small" />
+                        {isSubmitting
+                            ? "Redirecting..."
+                            : "Continue with Google"}
+                        <ArrowForwardRoundedIcon fontSize="small" />
+                    </button>
+
+                    {mobileAppDownloadUrl ? (
+                        <button
+                            type="button"
+                            className="secondary-button auth-page__action"
+                            onClick={() => {
+                                window.open(
+                                    mobileAppDownloadUrl,
+                                    "_blank",
+                                    "noopener,noreferrer",
+                                );
+                            }}
+                        >
+                            <DownloadRoundedIcon fontSize="small" />
+                            Download mobile app
+                        </button>
+                    ) : null}
+                </div>
 
                 {errorMessage ? (
                     <p className="auth-page__error">{errorMessage}</p>

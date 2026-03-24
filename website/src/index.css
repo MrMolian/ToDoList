@@ -263,8 +263,24 @@ select:focus-visible {
     line-height: 1.6;
 }
 
+.auth-page__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
 .auth-page__action {
     width: fit-content;
+}
+
+@media (max-width: 640px) {
+    .auth-page__actions {
+        display: grid;
+    }
+
+    .auth-page__action {
+        width: 100%;
+    }
 }
 
 .auth-page__error,
