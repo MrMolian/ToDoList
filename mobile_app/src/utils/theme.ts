@@ -1,25 +1,24 @@
 import type { TaskPriority } from "../models/taskModel";
 
 export const palette = {
-    backgroundTop: "#eef3ff",
-    backgroundBottom: "#f7f4ef",
-    textMain: "#102038",
-    textMuted: "#5b6778",
-    textSoft: "#7f8b9d",
-    accent: "#3d6dff",
-    accentStrong: "#2448d8",
-    accentSoft: "rgba(61, 109, 255, 0.12)",
-    success: "#30a46c",
-    warning: "#d97706",
-    danger: "#d64745",
-    glassStrong: "rgba(255, 255, 255, 0.82)",
-    glassMedium: "rgba(255, 255, 255, 0.72)",
-    glassLight: "rgba(255, 255, 255, 0.56)",
-    glassBorder: "rgba(255, 255, 255, 0.58)",
-    shadow: "rgba(111, 139, 185, 0.18)",
-    shadowSoft: "rgba(85, 105, 138, 0.12)",
-    orbBlue: "rgba(164, 188, 255, 0.7)",
-    orbOrange: "rgba(255, 208, 161, 0.7)",
+    background: "#ece8de",
+    surface: "#fbfaf7",
+    surfaceMuted: "#f4f1ea",
+    surfaceStrong: "#ebe5d9",
+    border: "#d8d0c1",
+    borderStrong: "#c5bcac",
+    textMain: "#1f1c18",
+    textMuted: "#5f584e",
+    textSoft: "#7c7468",
+    accent: "#2f5b4f",
+    accentStrong: "#25473f",
+    accentSoft: "#d7e5de",
+    success: "#2f7a54",
+    warning: "#ad7a2e",
+    danger: "#b34b38",
+    white: "#ffffff",
+    shadow: "rgba(55, 47, 37, 0.14)",
+    shadowSoft: "rgba(31, 28, 24, 0.08)",
 };
 
 export const defaultGroupColor = "#7b91ff";
@@ -30,17 +29,17 @@ export const priorityTheme: Record<
 > = {
     low: {
         label: "Low",
-        background: "rgba(123, 145, 255, 0.12)",
-        color: "#4e62be",
+        background: "#e4e8f1",
+        color: "#4d6473",
     },
     medium: {
         label: "Medium",
-        background: "rgba(255, 179, 71, 0.14)",
-        color: "#ab6e00",
+        background: "#efe3cc",
+        color: palette.warning,
     },
     high: {
         label: "High",
-        background: "rgba(214, 71, 69, 0.12)",
+        background: "#f0d8d4",
         color: palette.danger,
     },
 };
@@ -67,7 +66,7 @@ export function hexToRgba(hex: string, alpha: number) {
             : normalized;
 
     if (expanded.length !== 6) {
-        return `rgba(61, 109, 255, ${alpha})`;
+        return `rgba(47, 91, 79, ${alpha})`;
     }
 
     const red = Number.parseInt(expanded.slice(0, 2), 16);

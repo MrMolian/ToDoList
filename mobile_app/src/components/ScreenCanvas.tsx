@@ -14,8 +14,6 @@ export default function ScreenCanvas({ children }: PropsWithChildren) {
 
     return (
         <View style={[styles.root, { paddingTop: topInset }]}>
-            <View style={[styles.orb, styles.orbLeft]} />
-            <View style={[styles.orb, styles.orbRight]} />
             <View style={styles.content}>{children}</View>
         </View>
     );
@@ -24,30 +22,11 @@ export default function ScreenCanvas({ children }: PropsWithChildren) {
 const styles = StyleSheet.create({
     root: {
         flex: 1,
-        backgroundColor: palette.backgroundTop,
+        backgroundColor: palette.background,
     },
     content: {
         flex: 1,
         paddingHorizontal: 18,
         paddingBottom: 18,
-    },
-    orb: {
-        position: "absolute",
-        borderRadius: 999,
-        opacity: 0.65,
-    },
-    orbLeft: {
-        top: -40,
-        left: -70,
-        width: 220,
-        height: 220,
-        backgroundColor: palette.orbBlue,
-    },
-    orbRight: {
-        right: -50,
-        bottom: 80,
-        width: 200,
-        height: 200,
-        backgroundColor: palette.orbOrange,
     },
 });

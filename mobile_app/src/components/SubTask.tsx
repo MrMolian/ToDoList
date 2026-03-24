@@ -1,34 +1,56 @@
 import { MaterialIcons } from "@expo/vector-icons";
+import { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import type { Task } from "../models/taskModel";
+import { confirmDestructiveAction } from "../utils/confirm";
 import { palette } from "../utils/theme";
 
 interface SubTaskProps {
     task: Task;
     onToggleAchieved: (task: Task) => void;
+    onDelete: (task: Task) => Promise<void>;
 }
 
-export default function SubTask({ task, onToggleAchieved }: SubTaskProps) {
+export default function SubTask({
+    task,
+    onToggleAchieved,
+    onDelete,
+}: SubTaskProps) {
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    async function handleDelete() {
+        const confirmed = await confirmDestructiveAction(
+            "Delete subtask",
+            `Delete "${task.title}"?`,
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        setIsDeleting(true);
+
+        try {
+            await onDelete(task);
+        } finally {
+            setIsDeleting(false);
+        }
+    }
+
     return (
         <View style={styles.container}>
             <Pressable
                 onPress={() => {
                     onToggleAchieved(task);
                 }}
-                style={[
-                    styles.toggle,
-                    task.achieved ? styles.toggleAchieved : null,
-                ]}
+                disabled={isDeleting}
+                style={styles.toggle}
             >
                 <MaterialIcons
-                    name={
-                        task.achieved
-                            ? "check-circle"
-                            : "radio-button-unchecked"
-                    }
-                    size={18}
-                    color={task.achieved ? palette.success : palette.accentStrong}
+                    name={task.achieved ? "check-box" : "check-box-outline-blank"}
+                    size={22}
+                    color={task.achieved ? palette.accent : palette.borderStrong}
                 />
             </Pressable>
 
@@ -42,9 +64,15 @@ export default function SubTask({ task, onToggleAchieved }: SubTaskProps) {
                 {task.title}
             </Text>
 
-            <Text style={styles.meta}>
-                {task.achieved ? "Achieved" : "Pending"}
-            </Text>
+            <Pressable
+                onPress={() => {
+                    void handleDelete();
+                }}
+                disabled={isDeleting}
+                style={styles.deleteButton}
+            >
+                <MaterialIcons name="delete-outline" size={20} color={palette.danger} />
+            </Pressable>
         </View>
     );
 }
@@ -56,19 +84,14 @@ const styles = StyleSheet.create({
         gap: 10,
         paddingHorizontal: 14,
         paddingVertical: 12,
-        borderRadius: 16,
-        backgroundColor: "rgba(255, 255, 255, 0.44)",
+        borderRadius: 12,
+        backgroundColor: palette.surfaceMuted,
+        borderWidth: 1,
+        borderColor: palette.border,
     },
     toggle: {
-        width: 32,
-        height: 32,
         alignItems: "center",
         justifyContent: "center",
-        borderRadius: 999,
-        backgroundColor: palette.accentSoft,
-    },
-    toggleAchieved: {
-        backgroundColor: "rgba(48, 164, 108, 0.14)",
     },
     title: {
         flex: 1,
@@ -79,9 +102,11 @@ const styles = StyleSheet.create({
         textDecorationLine: "line-through",
         opacity: 0.72,
     },
-    meta: {
-        color: palette.textSoft,
-        fontSize: 12,
-        fontWeight: "600",
+    deleteButton: {
+        width: 32,
+        height: 32,
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 10,
     },
 });

@@ -11,9 +11,9 @@ import {
     View,
 } from "react-native";
 
-import { getTasks, updateTaskAchieved } from "../api/Task";
-import { getTaskGroups } from "../api/TaskGroup";
 import { signOutFromGoogle } from "../api/Auth";
+import { deleteTask, getTasks, updateTaskAchieved } from "../api/Task";
+import { getTaskGroups } from "../api/TaskGroup";
 import Breadcrumbs from "../components/Breadcrumbs";
 import ScreenCanvas from "../components/ScreenCanvas";
 import TaskCard from "../components/Task";
@@ -24,11 +24,7 @@ import type { Task } from "../models/taskModel";
 import type { TaskGroup } from "../models/taskGroupModel";
 import { useSession } from "../providers/sessionContext";
 import supabase from "../utils/supabase";
-import {
-    defaultGroupColor,
-    hexToRgba,
-    palette,
-} from "../utils/theme";
+import { palette } from "../utils/theme";
 
 function buildPath(taskGroups: TaskGroup[], pathIds: string[]) {
     const taskGroupsMap = new Map(
@@ -259,6 +255,17 @@ export default function DashboardScreen() {
         }
     }
 
+    async function handleDeleteTask(task: Task) {
+        try {
+            await deleteTask(task.id);
+            handleDeletedTask(task);
+        } catch (error) {
+            setErrorMessage(
+                error instanceof Error ? error.message : "Task could not be deleted.",
+            );
+        }
+    }
+
     function handleSavedTask(savedTask: Task) {
         setTasks((currentTasks) => {
             const exists = currentTasks.some((candidate) => candidate.id === savedTask.id);
@@ -366,7 +373,7 @@ export default function DashboardScreen() {
                         </View>
                         <View style={styles.brandCopy}>
                             <Text style={styles.brandTitle}>ToDoApp</Text>
-                            <Text style={styles.brandSubtitle}>Focused task spaces</Text>
+                            <Text style={styles.brandSubtitle}>Structured workbench</Text>
                         </View>
                     </View>
 
@@ -400,7 +407,14 @@ export default function DashboardScreen() {
                             {isSigningOut ? (
                                 <ActivityIndicator color={palette.textMain} />
                             ) : (
-                                <Text style={styles.secondaryButtonText}>Sign out</Text>
+                                <>
+                                    <MaterialIcons
+                                        name="person-outline"
+                                        size={18}
+                                        color={palette.textMain}
+                                    />
+                                    <Text style={styles.secondaryButtonText}>Sign out</Text>
+                                </>
                             )}
                         </Pressable>
                     </View>
@@ -443,34 +457,14 @@ export default function DashboardScreen() {
                             onPress={openCreateTaskGroupModal}
                             style={styles.secondaryButton}
                         >
-                            <MaterialIcons
-                                name="add"
-                                size={18}
-                                color={palette.textMain}
-                            />
+                            <MaterialIcons name="add" size={18} color={palette.textMain} />
                             <Text style={styles.secondaryButtonText}>New group</Text>
                         </Pressable>
 
                         <Pressable onPress={openCreateTaskModal} style={styles.primaryButton}>
-                            <MaterialIcons name="add" size={18} color="#ffffff" />
+                            <MaterialIcons name="add" size={18} color={palette.white} />
                             <Text style={styles.primaryButtonText}>New task</Text>
                         </Pressable>
-
-                        {currentTaskGroup ? (
-                            <Pressable
-                                onPress={() => {
-                                    openEditTaskGroupModal(currentTaskGroup);
-                                }}
-                                style={styles.secondaryButton}
-                            >
-                                <MaterialIcons
-                                    name="edit"
-                                    size={18}
-                                    color={palette.textMain}
-                                />
-                                <Text style={styles.secondaryButtonText}>Edit group</Text>
-                            </Pressable>
-                        ) : null}
                     </View>
                 </View>
 
@@ -517,14 +511,14 @@ export default function DashboardScreen() {
                 ) : null}
 
                 {!isLoading && !errorMessage && isValid ? (
-                    <>
-                        <View style={styles.panel}>
-                            <View style={styles.panelHeader}>
-                                <View style={styles.panelHeaderCopy}>
-                                    <Text style={styles.sectionLabel}>Task groups</Text>
-                                    <Text style={styles.panelTitle}>Nested spaces</Text>
-                                </View>
+                    <View style={styles.panel}>
+                        <View style={styles.panelHeader}>
+                            <View style={styles.panelHeaderCopy}>
+                                <Text style={styles.sectionLabel}>Workspace contents</Text>
+                                <Text style={styles.panelTitle}>Groups and tasks</Text>
+                            </View>
 
+                            <View style={styles.panelActions}>
                                 <Pressable
                                     onPress={openCreateTaskGroupModal}
                                     style={styles.secondaryButton}
@@ -534,81 +528,113 @@ export default function DashboardScreen() {
                                         size={18}
                                         color={palette.textMain}
                                     />
-                                    <Text style={styles.secondaryButtonText}>Add group</Text>
+                                    <Text style={styles.secondaryButtonText}>
+                                        Add group
+                                    </Text>
                                 </Pressable>
-                            </View>
-
-                            {visibleTaskGroups.length > 0 ? (
-                                <View style={styles.cardList}>
-                                    {visibleTaskGroups.map((taskGroup) => {
-                                        const childGroupCount = taskGroups.filter(
-                                            (candidate) =>
-                                                candidate.parent_id === taskGroup.id,
-                                        ).length;
-                                        const taskCount = tasks.filter(
-                                            (task) =>
-                                                task.group_parent_id === taskGroup.id &&
-                                                task.task_parent_id === null,
-                                        ).length;
-
-                                        return (
-                                            <TaskGroupCard
-                                                key={taskGroup.id}
-                                                taskGroup={taskGroup}
-                                                childGroupCount={childGroupCount}
-                                                taskCount={taskCount}
-                                                onOpen={(group) => {
-                                                    setPathIds([...pathIds, group.id]);
-                                                }}
-                                                onEdit={openEditTaskGroupModal}
-                                            />
-                                        );
-                                    })}
-                                </View>
-                            ) : (
-                                <Text style={styles.emptyCopy}>
-                                    No child task groups in this location.
-                                </Text>
-                            )}
-                        </View>
-
-                        <View style={styles.panel}>
-                            <View style={styles.panelHeader}>
-                                <View style={styles.panelHeaderCopy}>
-                                    <Text style={styles.sectionLabel}>Tasks</Text>
-                                    <Text style={styles.panelTitle}>Focused work</Text>
-                                </View>
 
                                 <Pressable
                                     onPress={openCreateTaskModal}
                                     style={styles.primaryButton}
                                 >
-                                    <MaterialIcons name="add" size={18} color="#ffffff" />
+                                    <MaterialIcons
+                                        name="add"
+                                        size={18}
+                                        color={palette.white}
+                                    />
                                     <Text style={styles.primaryButtonText}>Add task</Text>
                                 </Pressable>
                             </View>
-
-                            {visibleTasks.length > 0 ? (
-                                <View style={styles.cardList}>
-                                    {visibleTasks.map((task) => (
-                                        <TaskCard
-                                            key={task.id}
-                                            task={task}
-                                            subTasks={subTasksByParent[task.id] ?? []}
-                                            onEdit={openEditTaskModal}
-                                            onAddSubTask={openCreateSubTaskModal}
-                                            onToggleAchieved={handleToggleTaskAchieved}
-                                            onToggleSubTaskAchieved={handleToggleTaskAchieved}
-                                        />
-                                    ))}
-                                </View>
-                            ) : (
-                                <Text style={styles.emptyCopy}>
-                                    No tasks in this workspace yet.
-                                </Text>
-                            )}
                         </View>
-                    </>
+
+                        {visibleTaskGroups.length === 0 && visibleTasks.length === 0 ? (
+                            <View style={styles.inlineEmptyState}>
+                                <Text style={styles.emptyCopy}>
+                                    No groups or tasks in this workspace yet.
+                                </Text>
+                            </View>
+                        ) : (
+                            <View style={styles.workspaceStack}>
+                                <View style={styles.workspaceSection}>
+                                    <View style={styles.workspaceSectionHeader}>
+                                        <Text style={styles.sectionLabel}>Task groups</Text>
+                                        <Text style={styles.workspaceCount}>
+                                            {visibleTaskGroups.length}
+                                        </Text>
+                                    </View>
+
+                                    {visibleTaskGroups.length > 0 ? (
+                                        <View style={styles.cardList}>
+                                            {visibleTaskGroups.map((taskGroup) => {
+                                                const childGroupCount = taskGroups.filter(
+                                                    (candidate) =>
+                                                        candidate.parent_id === taskGroup.id,
+                                                ).length;
+                                                const taskCount = tasks.filter(
+                                                    (task) =>
+                                                        task.group_parent_id === taskGroup.id &&
+                                                        task.task_parent_id === null,
+                                                ).length;
+
+                                                return (
+                                                    <TaskGroupCard
+                                                        key={taskGroup.id}
+                                                        taskGroup={taskGroup}
+                                                        childGroupCount={childGroupCount}
+                                                        taskCount={taskCount}
+                                                        onOpen={(group) => {
+                                                            setPathIds([...pathIds, group.id]);
+                                                        }}
+                                                        onEdit={openEditTaskGroupModal}
+                                                    />
+                                                );
+                                            })}
+                                        </View>
+                                    ) : (
+                                        <View style={styles.inlineEmptyState}>
+                                            <Text style={styles.emptyCopy}>
+                                                No child task groups in this location.
+                                            </Text>
+                                        </View>
+                                    )}
+                                </View>
+
+                                <View style={styles.workspaceSection}>
+                                    <View style={styles.workspaceSectionHeader}>
+                                        <Text style={styles.sectionLabel}>Tasks</Text>
+                                        <Text style={styles.workspaceCount}>
+                                            {visibleTasks.length}
+                                        </Text>
+                                    </View>
+
+                                    {visibleTasks.length > 0 ? (
+                                        <View style={styles.cardList}>
+                                            {visibleTasks.map((task) => (
+                                                <TaskCard
+                                                    key={task.id}
+                                                    task={task}
+                                                    subTasks={subTasksByParent[task.id] ?? []}
+                                                    onEdit={openEditTaskModal}
+                                                    onAddSubTask={openCreateSubTaskModal}
+                                                    onToggleAchieved={handleToggleTaskAchieved}
+                                                    onToggleSubTaskAchieved={
+                                                        handleToggleTaskAchieved
+                                                    }
+                                                    onDeleteSubTask={handleDeleteTask}
+                                                />
+                                            ))}
+                                        </View>
+                                    ) : (
+                                        <View style={styles.inlineEmptyState}>
+                                            <Text style={styles.emptyCopy}>
+                                                No tasks in this workspace yet.
+                                            </Text>
+                                        </View>
+                                    )}
+                                </View>
+                            </View>
+                        )}
+                    </View>
                 ) : null}
             </ScrollView>
 
@@ -643,17 +669,22 @@ export default function DashboardScreen() {
 
 const styles = StyleSheet.create({
     scrollContent: {
-        gap: 22,
+        gap: 18,
         paddingTop: 18,
         paddingBottom: 36,
     },
     header: {
         gap: 18,
         padding: 18,
-        borderRadius: 32,
-        backgroundColor: palette.glassStrong,
+        borderRadius: 24,
+        backgroundColor: palette.surface,
         borderWidth: 1,
-        borderColor: palette.glassBorder,
+        borderColor: palette.border,
+        shadowColor: palette.shadow,
+        shadowOpacity: 0.14,
+        shadowOffset: { width: 0, height: 10 },
+        shadowRadius: 30,
+        elevation: 3,
     },
     brand: {
         flexDirection: "row",
@@ -661,20 +692,15 @@ const styles = StyleSheet.create({
         gap: 14,
     },
     brandBadge: {
-        width: 46,
-        height: 46,
+        width: 42,
+        height: 42,
         alignItems: "center",
         justifyContent: "center",
-        borderRadius: 16,
+        borderRadius: 12,
         backgroundColor: palette.accent,
-        shadowColor: hexToRgba(palette.accent, 0.28),
-        shadowOpacity: 0.6,
-        shadowOffset: { width: 0, height: 12 },
-        shadowRadius: 20,
-        elevation: 4,
     },
     brandBadgeText: {
-        color: "#ffffff",
+        color: palette.white,
         fontWeight: "800",
     },
     brandCopy: {
@@ -697,9 +723,9 @@ const styles = StyleSheet.create({
         gap: 14,
     },
     avatar: {
-        width: 44,
-        height: 44,
-        borderRadius: 15,
+        width: 42,
+        height: 42,
+        borderRadius: 12,
     },
     avatarFallback: {
         alignItems: "center",
@@ -724,10 +750,10 @@ const styles = StyleSheet.create({
     hero: {
         gap: 20,
         padding: 24,
-        borderRadius: 32,
-        backgroundColor: palette.glassStrong,
+        borderRadius: 24,
+        backgroundColor: palette.surfaceStrong,
         borderWidth: 1,
-        borderColor: palette.glassBorder,
+        borderColor: palette.borderStrong,
     },
     heroCopy: {
         gap: 10,
@@ -736,19 +762,19 @@ const styles = StyleSheet.create({
         color: palette.textSoft,
         fontSize: 12,
         fontWeight: "800",
-        letterSpacing: 1.4,
+        letterSpacing: 1.2,
         textTransform: "uppercase",
     },
     heroTitle: {
         color: palette.textMain,
-        fontSize: 42,
-        lineHeight: 42,
+        fontSize: 36,
+        lineHeight: 36,
         fontWeight: "800",
-        letterSpacing: -1.6,
+        letterSpacing: -1.4,
     },
     heroDescription: {
         color: palette.textMuted,
-        lineHeight: 25,
+        lineHeight: 24,
     },
     heroMeta: {
         flexDirection: "row",
@@ -759,22 +785,29 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 8,
-        paddingHorizontal: 15,
-        paddingVertical: 11,
-        borderRadius: 999,
-        backgroundColor: palette.glassLight,
+        minHeight: 42,
+        paddingHorizontal: 14,
+        borderRadius: 12,
+        backgroundColor: palette.surface,
+        borderWidth: 1,
+        borderColor: palette.border,
     },
     statText: {
         color: palette.textMuted,
         fontWeight: "700",
     },
     panel: {
-        gap: 20,
+        gap: 18,
         padding: 24,
-        borderRadius: 32,
-        backgroundColor: palette.glassStrong,
+        borderRadius: 24,
+        backgroundColor: palette.surface,
         borderWidth: 1,
-        borderColor: palette.glassBorder,
+        borderColor: palette.border,
+        shadowColor: palette.shadow,
+        shadowOpacity: 0.12,
+        shadowOffset: { width: 0, height: 8 },
+        shadowRadius: 24,
+        elevation: 2,
     },
     emptyPanel: {
         alignItems: "flex-start",
@@ -787,12 +820,41 @@ const styles = StyleSheet.create({
     },
     panelTitle: {
         color: palette.textMain,
-        fontSize: 28,
+        fontSize: 26,
         fontWeight: "800",
         letterSpacing: -0.8,
     },
+    panelActions: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 12,
+    },
+    workspaceStack: {
+        gap: 22,
+    },
+    workspaceSection: {
+        gap: 14,
+    },
+    workspaceSectionHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+    },
+    workspaceCount: {
+        color: palette.textSoft,
+        fontWeight: "700",
+    },
     cardList: {
-        gap: 18,
+        gap: 12,
+    },
+    inlineEmptyState: {
+        padding: 16,
+        borderRadius: 14,
+        borderWidth: 1,
+        borderStyle: "dashed",
+        borderColor: palette.borderStrong,
+        backgroundColor: palette.surfaceMuted,
     },
     emptyTitle: {
         color: palette.textMain,
@@ -813,9 +875,11 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 8,
         paddingHorizontal: 16,
-        paddingVertical: 12,
-        borderRadius: 999,
-        backgroundColor: "rgba(255, 255, 255, 0.52)",
+        minHeight: 44,
+        borderRadius: 12,
+        backgroundColor: palette.surface,
+        borderWidth: 1,
+        borderColor: palette.border,
     },
     secondaryButtonText: {
         color: palette.textMain,
@@ -827,12 +891,12 @@ const styles = StyleSheet.create({
         alignItems: "center",
         gap: 8,
         paddingHorizontal: 16,
-        paddingVertical: 12,
-        borderRadius: 999,
+        minHeight: 44,
+        borderRadius: 12,
         backgroundColor: palette.accent,
     },
     primaryButtonText: {
-        color: "#ffffff",
+        color: palette.white,
         fontWeight: "700",
     },
 });

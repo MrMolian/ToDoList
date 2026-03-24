@@ -1,5 +1,6 @@
 import { Outlet, Link } from "react-router-dom";
 import { useState } from "react";
+import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 
 import supabase from "../utils/supabase";
 import { useSession } from "../providers/sessionContext";
@@ -29,9 +30,6 @@ export default function BaseLayout() {
 
     return (
         <div className="app-shell">
-            <div className="app-shell__orb app-shell__orb--left" />
-            <div className="app-shell__orb app-shell__orb--right" />
-
             <header className="glass-panel app-shell__header">
                 <Link to="/dashboard" className="app-shell__brand">
                     <span className="app-shell__brand-badge">TD</span>
@@ -69,6 +67,7 @@ export default function BaseLayout() {
                         }}
                         disabled={isSigningOut}
                     >
+                        <PersonOutlineRoundedIcon fontSize="small" />
                         {isSigningOut ? "Signing Out..." : "Sign Out"}
                     </button>
                 </div>

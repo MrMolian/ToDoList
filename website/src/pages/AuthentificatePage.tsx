@@ -30,28 +30,12 @@ export default function AuthentificatePage() {
 
     return (
         <section className="auth-page">
-            <div className="auth-page__orb auth-page__orb--top" />
-            <div className="auth-page__orb auth-page__orb--bottom" />
-
             <div className="glass-panel auth-page__panel">
-                <div className="section-label">ToDoApp</div>
-                <h1>Organize work through calm, nested task spaces.</h1>
+                <div className="section-label">Moaad's ToDoList</div>
+                <h1>Connect to Moaad&apos;s ToDoList app.</h1>
                 <p className="auth-page__lead">
-                    Sign in with Google to open your dashboard, move through task
-                    groups like folders, and keep every to-do anchored to the
-                    right place.
+                    Sign in with Google to access your tasks.
                 </p>
-
-                <div className="auth-page__features">
-                    <div className="mini-feature">
-                        <span>Nested groups</span>
-                        <small>Move from root to any child workspace via breadcrumbs.</small>
-                    </div>
-                    <div className="mini-feature">
-                        <span>Focused editing</span>
-                        <small>Adjust tasks and groups in-place with lightweight dialogs.</small>
-                    </div>
-                </div>
 
                 <button
                     type="button"

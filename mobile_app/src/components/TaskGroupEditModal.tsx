@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     },
     backdrop: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: "rgba(16, 32, 56, 0.24)",
+        backgroundColor: "rgba(31, 28, 24, 0.24)",
     },
     wrapper: {
         maxHeight: "90%",
@@ -275,10 +275,10 @@ const styles = StyleSheet.create({
     card: {
         gap: 18,
         padding: 24,
-        borderRadius: 28,
-        backgroundColor: "rgba(247, 249, 255, 0.96)",
+        borderRadius: 20,
+        backgroundColor: palette.surface,
         borderWidth: 1,
-        borderColor: "rgba(255, 255, 255, 0.52)",
+        borderColor: palette.border,
     },
     title: {
         color: palette.textMain,
@@ -288,8 +288,8 @@ const styles = StyleSheet.create({
     },
     errorBox: {
         padding: 12,
-        borderRadius: 16,
-        backgroundColor: "rgba(214, 71, 69, 0.1)",
+        borderRadius: 12,
+        backgroundColor: "#f0d8d4",
     },
     errorText: {
         color: palette.danger,
@@ -306,10 +306,10 @@ const styles = StyleSheet.create({
         textTransform: "uppercase",
     },
     input: {
-        borderRadius: 18,
+        borderRadius: 12,
         borderWidth: 1,
-        borderColor: "rgba(208, 218, 235, 0.8)",
-        backgroundColor: "#ffffff",
+        borderColor: palette.border,
+        backgroundColor: palette.surfaceMuted,
         color: palette.textMain,
         paddingHorizontal: 16,
         paddingVertical: 14,
@@ -340,8 +340,8 @@ const styles = StyleSheet.create({
         alignSelf: "flex-start",
         paddingHorizontal: 14,
         paddingVertical: 10,
-        borderRadius: 999,
-        backgroundColor: "rgba(214, 71, 69, 0.1)",
+        borderRadius: 12,
+        backgroundColor: "#f0d8d4",
     },
     deleteText: {
         color: palette.danger,
@@ -355,8 +355,10 @@ const styles = StyleSheet.create({
     secondaryButton: {
         paddingHorizontal: 16,
         paddingVertical: 12,
-        borderRadius: 999,
-        backgroundColor: "rgba(255, 255, 255, 0.82)",
+        borderRadius: 12,
+        backgroundColor: palette.surface,
+        borderWidth: 1,
+        borderColor: palette.border,
     },
     secondaryButtonText: {
         color: palette.textMain,
@@ -367,7 +369,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingHorizontal: 16,
         paddingVertical: 12,
-        borderRadius: 999,
+        borderRadius: 12,
         backgroundColor: palette.accent,
     },
     primaryButtonText: {

@@ -132,7 +132,7 @@ export default function TaskEditModal({
             onClose={isSaving || isDeleting ? undefined : onClose}
             fullWidth
             maxWidth="sm"
-            slotProps={{ paper: { className: "mui-glass-dialog__paper" } }}
+            slotProps={{ paper: { className: "workbench-dialog__paper" } }}
         >
             <form onSubmit={handleSubmit}>
                 <DialogTitle>

@@ -1,11 +1,8 @@
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import EditRoundedIcon from "@mui/icons-material/EditRounded";
-import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
-import TaskRoundedIcon from "@mui/icons-material/TaskRounded";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
-import { getTasks, updateTaskAchieved } from "../api/Task";
+import { deleteTask, getTasks, updateTaskAchieved } from "../api/Task";
 import { getTaskGroups } from "../api/TaskGroup";
 import Breadcrumbs from "../components/Breadcrumbs";
 import TaskCard from "../components/Task";
@@ -199,6 +196,17 @@ export default function DashboardPage() {
         }
     }
 
+    async function handleDeleteTask(task: Task) {
+        try {
+            await deleteTask(task.id);
+            handleDeletedTask(task);
+        } catch (error) {
+            setErrorMessage(
+                error instanceof Error ? error.message : "Task could not be deleted.",
+            );
+        }
+    }
+
     function handleDeletedTask(deletedTask: Task) {
         setTasks((currentTasks) => {
             const deletedTaskIds = collectTaskDescendantIds(
@@ -290,55 +298,7 @@ export default function DashboardPage() {
 
     return (
         <>
-            <section className="glass-panel dashboard-hero">
-                <div>
-                    <div className="section-label">Dashboard</div>
-                    <h1>{currentTaskGroup?.title ?? "Root workspace"}</h1>
-                    <p className="dashboard-hero__copy">
-                        {currentTaskGroup?.description ||
-                            "Move through task groups from the root path and keep the visible tasks scoped to the current workspace."}
-                    </p>
-                </div>
-
-                <div className="dashboard-hero__meta">
-                    <div className="dashboard-stat">
-                        <FolderRoundedIcon fontSize="small" />
-                        <span>{visibleTaskGroups.length} groups</span>
-                    </div>
-                    <div className="dashboard-stat">
-                        <TaskRoundedIcon fontSize="small" />
-                        <span>{visibleTasks.length} tasks</span>
-                    </div>
-                    <button
-                        type="button"
-                        className="secondary-button"
-                        onClick={openCreateTaskGroupModal}
-                    >
-                        <AddRoundedIcon fontSize="small" />
-                        New group
-                    </button>
-                    <button
-                        type="button"
-                        className="primary-button"
-                        onClick={openCreateTaskModal}
-                    >
-                        <AddRoundedIcon fontSize="small" />
-                        New task
-                    </button>
-                    {currentTaskGroup ? (
-                        <button
-                            type="button"
-                            className="secondary-button"
-                            onClick={() => {
-                                openEditTaskGroupModal(currentTaskGroup);
-                            }}
-                        >
-                            <EditRoundedIcon fontSize="small" />
-                            Edit group
-                        </button>
-                    ) : null}
-                </div>
-            </section>
+            
 
             <section className="glass-panel dashboard-panel">
                 <Breadcrumbs path={path} />
@@ -370,96 +330,109 @@ export default function DashboardPage() {
             ) : null}
 
             {!isLoading && !errorMessage && isValid ? (
-                <div className="dashboard-grid">
-                    <section className="glass-panel dashboard-panel">
-                        <div className="dashboard-panel__header">
-                            <div>
-                                <div className="section-label">Task groups</div>
-                                <h2>Nested spaces</h2>
-                            </div>
-                            <div className="dashboard-panel__actions">
-                                <button
-                                    type="button"
-                                    className="secondary-button"
-                                    onClick={openCreateTaskGroupModal}
-                                >
-                                    <AddRoundedIcon fontSize="small" />
-                                    Add group
-                                </button>
-                            </div>
+                <section className="glass-panel dashboard-panel">
+                    <div className="dashboard-panel__header">
+                        <div>
+                            <div className="section-label">Workspace contents</div>
+                            <h2>Groups and tasks</h2>
                         </div>
-
-                        {visibleTaskGroups.length > 0 ? (
-                            <div className="card-grid">
-                                {visibleTaskGroups.map((taskGroup) => {
-                                    const href = `/dashboard/${[...pathIds, taskGroup.id].join("/")}`;
-                                    const childGroupCount = taskGroups.filter(
-                                        (candidate) => candidate.parent_id === taskGroup.id,
-                                    ).length;
-                                    const taskCount = tasks.filter(
-                                        (task) =>
-                                            task.group_parent_id === taskGroup.id &&
-                                            task.task_parent_id === null,
-                                    ).length;
-
-                                    return (
-                                        <TaskGroupCard
-                                            key={taskGroup.id}
-                                            taskGroup={taskGroup}
-                                            href={href}
-                                            childGroupCount={childGroupCount}
-                                            taskCount={taskCount}
-                                            onEdit={openEditTaskGroupModal}
-                                        />
-                                    );
-                                })}
-                            </div>
-                        ) : (
-                            <div className="empty-state">
-                                No child task groups in this location.
-                            </div>
-                        )}
-                    </section>
-
-                    <section className="glass-panel dashboard-panel">
-                        <div className="dashboard-panel__header">
-                            <div>
-                                <div className="section-label">Tasks</div>
-                                <h2>Direct work items</h2>
-                            </div>
-                            <div className="dashboard-panel__actions">
-                                <button
-                                    type="button"
-                                    className="primary-button"
-                                    onClick={openCreateTaskModal}
-                                >
-                                    <AddRoundedIcon fontSize="small" />
-                                    Add task
-                                </button>
-                            </div>
+                        <div className="dashboard-panel__actions">
+                            <button
+                                type="button"
+                                className="secondary-button"
+                                onClick={openCreateTaskGroupModal}
+                            >
+                                <AddRoundedIcon fontSize="small" />
+                                Add group
+                            </button>
+                            <button
+                                type="button"
+                                className="primary-button"
+                                onClick={openCreateTaskModal}
+                            >
+                                <AddRoundedIcon fontSize="small" />
+                                Add task
+                            </button>
                         </div>
+                    </div>
 
-                        {visibleTasks.length > 0 ? (
-                            <div className="card-grid">
-                                {visibleTasks.map((task) => (
-                                    <TaskCard
-                                        key={task.id}
-                                        task={task}
-                                        subTasks={subTasksByParent[task.id] ?? []}
-                                        onEdit={openEditTaskModal}
-                                        onAddSubTask={openCreateSubTaskModal}
-                                        onToggleAchieved={handleToggleTaskAchieved}
-                                        onToggleSubTaskAchieved={handleToggleTaskAchieved}
-                                    />
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="empty-state">
-                                No tasks in this task group yet.
-                            </div>
-                        )}
-                    </section>
-                </div>
+                    {visibleTaskGroups.length === 0 && visibleTasks.length === 0 ? (
+                        <div className="empty-state">
+                            No groups or tasks in this workspace yet.
+                        </div>
+                    ) : (
+                        <div className="workspace-stack">
+                            <section className="workspace-section">
+                                <div className="workspace-section__header">
+                                    <div className="section-label">Task groups</div>
+                                    <span>{visibleTaskGroups.length}</span>
+                                </div>
+
+                                {visibleTaskGroups.length > 0 ? (
+                                    <div className="workspace-list">
+                                        {visibleTaskGroups.map((taskGroup) => {
+                                            const href = `/dashboard/${[...pathIds, taskGroup.id].join("/")}`;
+                                            const childGroupCount = taskGroups.filter(
+                                                (candidate) =>
+                                                    candidate.parent_id === taskGroup.id,
+                                            ).length;
+                                            const taskCount = tasks.filter(
+                                                (task) =>
+                                                    task.group_parent_id === taskGroup.id &&
+                                                    task.task_parent_id === null,
+                                            ).length;
+
+                                            return (
+                                                <TaskGroupCard
+                                                    key={taskGroup.id}
+                                                    taskGroup={taskGroup}
+                                                    href={href}
+                                                    childGroupCount={childGroupCount}
+                                                    taskCount={taskCount}
+                                                    onEdit={openEditTaskGroupModal}
+                                                />
+                                            );
+                                        })}
+                                    </div>
+                                ) : (
+                                    <div className="empty-state empty-state--inline">
+                                        No child task groups in this location.
+                                    </div>
+                                )}
+                            </section>
+
+                            <section className="workspace-section">
+                                <div className="workspace-section__header">
+                                    <div className="section-label">Tasks</div>
+                                    <span>{visibleTasks.length}</span>
+                                </div>
+
+                                {visibleTasks.length > 0 ? (
+                                    <div className="workspace-list">
+                                        {visibleTasks.map((task) => (
+                                            <TaskCard
+                                                key={task.id}
+                                                task={task}
+                                                subTasks={subTasksByParent[task.id] ?? []}
+                                                onEdit={openEditTaskModal}
+                                                onAddSubTask={openCreateSubTaskModal}
+                                                onToggleAchieved={handleToggleTaskAchieved}
+                                                onToggleSubTaskAchieved={
+                                                    handleToggleTaskAchieved
+                                                }
+                                                onDeleteSubTask={handleDeleteTask}
+                                            />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="empty-state empty-state--inline">
+                                        No tasks in this task group yet.
+                                    </div>
+                                )}
+                            </section>
+                        </div>
+                    )}
+                </section>
             ) : null}
 
             <TaskEditModal
