@@ -1,38 +1,38 @@
 {
-  "expo": {
-    "name": "mobile_app",
-    "slug": "mobile_app",
-    "scheme": "todoapp",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.moaadb.todolist"
-    },
-    "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
-      },
-      "predictiveBackGestureEnabled": false,
-      "package": "com.moaadb.todolist"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "0c6f9441-02af-4ccd-889e-9748aac79b80"
-      }
+    "expo": {
+        "name": "ToDoList",
+        "slug": "todolist",
+        "scheme": "todoapp",
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "icon": "./assets/icon.png",
+        "userInterfaceStyle": "light",
+        "splash": {
+            "image": "./assets/splash-icon.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#CCC5B2"
+        },
+        "ios": {
+            "supportsTablet": true,
+            "bundleIdentifier": "com.moaadb.todolist"
+        },
+        "android": {
+            "adaptiveIcon": {
+                "backgroundColor": "#CCC5B2",
+                "foregroundImage": "./assets/android-icon-foreground.png",
+                "backgroundImage": "./assets/android-icon-background.png",
+                "monochromeImage": "./assets/android-icon-monochrome.png"
+            },
+            "predictiveBackGestureEnabled": false,
+            "package": "com.moaadb.todolist"
+        },
+        "web": {
+            "favicon": "./assets/favicon.png"
+        },
+        "extra": {
+            "eas": {
+                "projectId": "0c6f9441-02af-4ccd-889e-9748aac79b80"
+            }
+        }
     }
-  }
 }
