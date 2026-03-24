@@ -1,7 +1,7 @@
 {
     "expo": {
         "name": "ToDoList",
-        "slug": "todolist",
+        "slug": "mobile_app",
         "scheme": "todoapp",
         "version": "1.0.0",
         "orientation": "portrait",
