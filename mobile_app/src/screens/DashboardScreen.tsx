@@ -185,6 +185,8 @@ export default function DashboardScreen() {
                   task.task_parent_id === null,
           )
         : [];
+    const showWorkspaceEmptyState =
+        visibleTaskGroups.length === 0 && visibleTasks.length === 0;
 
     const subTasksByParent: Record<string, Task[]> = {};
 
@@ -464,7 +466,44 @@ export default function DashboardScreen() {
 
                 {!isLoading && !errorMessage && isValid ? (
                     <View style={styles.panel}>
-                        {visibleTaskGroups.length === 0 && visibleTasks.length === 0 ? (
+                        <View style={styles.panelHeader}>
+                            <View style={styles.panelHeaderCopy}>
+                                <Text style={styles.sectionLabel}>Workspace contents</Text>
+                                <Text style={styles.panelTitle}>Groups and tasks</Text>
+                            </View>
+
+                            <View style={styles.panelActions}>
+                                <Pressable
+                                    onPress={openCreateTaskGroupModal}
+                                    accessibilityRole="button"
+                                    accessibilityLabel="Add group"
+                                    style={styles.secondaryButton}
+                                >
+                                    <MaterialIcons
+                                        name="add"
+                                        size={18}
+                                        color={palette.textMain}
+                                    />
+                                    <Text style={styles.secondaryButtonText}>Add group</Text>
+                                </Pressable>
+
+                                <Pressable
+                                    onPress={openCreateTaskModal}
+                                    accessibilityRole="button"
+                                    accessibilityLabel="Add task"
+                                    style={styles.primaryButton}
+                                >
+                                    <MaterialIcons
+                                        name="add"
+                                        size={18}
+                                        color={palette.white}
+                                    />
+                                    <Text style={styles.primaryButtonText}>Add task</Text>
+                                </Pressable>
+                            </View>
+                        </View>
+
+                        {showWorkspaceEmptyState ? (
                             <View style={styles.inlineEmptyState}>
                                 <Text style={styles.emptyCopy}>
                                     No groups or tasks in this workspace yet.
@@ -714,6 +753,22 @@ const styles = StyleSheet.create({
     },
     emptyPanel: {
         alignItems: "flex-start",
+    },
+    panelHeader: {
+        gap: 16,
+    },
+    panelHeaderCopy: {
+        gap: 4,
+    },
+    panelTitle: {
+        color: palette.textMain,
+        fontSize: 22,
+        fontWeight: "800",
+    },
+    panelActions: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 12,
     },
     workspaceStack: {
         gap: 22,

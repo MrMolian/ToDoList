@@ -284,6 +284,8 @@ export default function DashboardPage() {
                   task.task_parent_id === null,
           )
         : [];
+    const showWorkspaceEmptyState =
+        visibleTaskGroups.length === 0 && visibleTasks.length === 0;
 
     const subTasksByParent: Record<string, Task[]> = {};
 
@@ -331,7 +333,32 @@ export default function DashboardPage() {
 
             {!isLoading && !errorMessage && isValid ? (
                 <section className="glass-panel dashboard-panel">
-                    {visibleTaskGroups.length === 0 && visibleTasks.length === 0 ? (
+                    <div className="dashboard-panel__header">
+                        <div>
+                            <div className="section-label">Workspace contents</div>
+                            <h2>Groups and tasks</h2>
+                        </div>
+                        <div className="dashboard-panel__actions">
+                            <button
+                                type="button"
+                                className="secondary-button"
+                                onClick={openCreateTaskGroupModal}
+                            >
+                                <AddRoundedIcon fontSize="small" />
+                                Add group
+                            </button>
+                            <button
+                                type="button"
+                                className="primary-button"
+                                onClick={openCreateTaskModal}
+                            >
+                                <AddRoundedIcon fontSize="small" />
+                                Add task
+                            </button>
+                        </div>
+                    </div>
+
+                    {showWorkspaceEmptyState ? (
                         <div className="empty-state">
                             No groups or tasks in this workspace yet.
                         </div>
