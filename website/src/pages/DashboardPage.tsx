@@ -331,31 +331,6 @@ export default function DashboardPage() {
 
             {!isLoading && !errorMessage && isValid ? (
                 <section className="glass-panel dashboard-panel">
-                    <div className="dashboard-panel__header">
-                        <div>
-                            <div className="section-label">Workspace contents</div>
-                            <h2>Groups and tasks</h2>
-                        </div>
-                        <div className="dashboard-panel__actions">
-                            <button
-                                type="button"
-                                className="secondary-button"
-                                onClick={openCreateTaskGroupModal}
-                            >
-                                <AddRoundedIcon fontSize="small" />
-                                Add group
-                            </button>
-                            <button
-                                type="button"
-                                className="primary-button"
-                                onClick={openCreateTaskModal}
-                            >
-                                <AddRoundedIcon fontSize="small" />
-                                Add task
-                            </button>
-                        </div>
-                    </div>
-
                     {visibleTaskGroups.length === 0 && visibleTasks.length === 0 ? (
                         <div className="empty-state">
                             No groups or tasks in this workspace yet.
@@ -364,7 +339,17 @@ export default function DashboardPage() {
                         <div className="workspace-stack">
                             <section className="workspace-section">
                                 <div className="workspace-section__header">
-                                    <div className="section-label">Task groups</div>
+                                    <div className="workspace-section__heading">
+                                        <div className="section-label">Task groups</div>
+                                        <button
+                                            type="button"
+                                            className="secondary-button icon-button"
+                                            onClick={openCreateTaskGroupModal}
+                                            aria-label="Add group"
+                                        >
+                                            <AddRoundedIcon fontSize="small" />
+                                        </button>
+                                    </div>
                                     <span>{visibleTaskGroups.length}</span>
                                 </div>
 
@@ -403,7 +388,17 @@ export default function DashboardPage() {
 
                             <section className="workspace-section">
                                 <div className="workspace-section__header">
-                                    <div className="section-label">Tasks</div>
+                                    <div className="workspace-section__heading">
+                                        <div className="section-label">Tasks</div>
+                                        <button
+                                            type="button"
+                                            className="primary-button icon-button"
+                                            onClick={openCreateTaskModal}
+                                            aria-label="Add task"
+                                        >
+                                            <AddRoundedIcon fontSize="small" />
+                                        </button>
+                                    </div>
                                     <span>{visibleTasks.length}</span>
                                 </div>
 

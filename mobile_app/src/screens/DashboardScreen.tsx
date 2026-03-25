@@ -464,41 +464,6 @@ export default function DashboardScreen() {
 
                 {!isLoading && !errorMessage && isValid ? (
                     <View style={styles.panel}>
-                        <View style={styles.panelHeader}>
-                            <View style={styles.panelHeaderCopy}>
-                                <Text style={styles.sectionLabel}>Workspace contents</Text>
-                                <Text style={styles.panelTitle}>Groups and tasks</Text>
-                            </View>
-
-                            <View style={styles.panelActions}>
-                                <Pressable
-                                    onPress={openCreateTaskGroupModal}
-                                    style={styles.secondaryButton}
-                                >
-                                    <MaterialIcons
-                                        name="add"
-                                        size={18}
-                                        color={palette.textMain}
-                                    />
-                                    <Text style={styles.secondaryButtonText}>
-                                        Add group
-                                    </Text>
-                                </Pressable>
-
-                                <Pressable
-                                    onPress={openCreateTaskModal}
-                                    style={styles.primaryButton}
-                                >
-                                    <MaterialIcons
-                                        name="add"
-                                        size={18}
-                                        color={palette.white}
-                                    />
-                                    <Text style={styles.primaryButtonText}>Add task</Text>
-                                </Pressable>
-                            </View>
-                        </View>
-
                         {visibleTaskGroups.length === 0 && visibleTasks.length === 0 ? (
                             <View style={styles.inlineEmptyState}>
                                 <Text style={styles.emptyCopy}>
@@ -509,7 +474,21 @@ export default function DashboardScreen() {
                             <View style={styles.workspaceStack}>
                                 <View style={styles.workspaceSection}>
                                     <View style={styles.workspaceSectionHeader}>
-                                        <Text style={styles.sectionLabel}>Task groups</Text>
+                                        <View style={styles.workspaceSectionHeading}>
+                                            <Text style={styles.sectionLabel}>Task groups</Text>
+                                            <Pressable
+                                                onPress={openCreateTaskGroupModal}
+                                                accessibilityRole="button"
+                                                accessibilityLabel="Add group"
+                                                style={styles.secondaryIconButton}
+                                            >
+                                                <MaterialIcons
+                                                    name="add"
+                                                    size={18}
+                                                    color={palette.textMain}
+                                                />
+                                            </Pressable>
+                                        </View>
                                         <Text style={styles.workspaceCount}>
                                             {visibleTaskGroups.length}
                                         </Text>
@@ -553,7 +532,21 @@ export default function DashboardScreen() {
 
                                 <View style={styles.workspaceSection}>
                                     <View style={styles.workspaceSectionHeader}>
-                                        <Text style={styles.sectionLabel}>Tasks</Text>
+                                        <View style={styles.workspaceSectionHeading}>
+                                            <Text style={styles.sectionLabel}>Tasks</Text>
+                                            <Pressable
+                                                onPress={openCreateTaskModal}
+                                                accessibilityRole="button"
+                                                accessibilityLabel="Add task"
+                                                style={styles.primaryIconButton}
+                                            >
+                                                <MaterialIcons
+                                                    name="add"
+                                                    size={18}
+                                                    color={palette.white}
+                                                />
+                                            </Pressable>
+                                        </View>
                                         <Text style={styles.workspaceCount}>
                                             {visibleTasks.length}
                                         </Text>
@@ -722,23 +715,6 @@ const styles = StyleSheet.create({
     emptyPanel: {
         alignItems: "flex-start",
     },
-    panelHeader: {
-        gap: 16,
-    },
-    panelHeaderCopy: {
-        gap: 8,
-    },
-    panelTitle: {
-        color: palette.textMain,
-        fontSize: 26,
-        fontWeight: "800",
-        letterSpacing: -0.8,
-    },
-    panelActions: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        gap: 12,
-    },
     workspaceStack: {
         gap: 22,
     },
@@ -749,6 +725,12 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
+        gap: 12,
+    },
+    workspaceSectionHeading: {
+        flexDirection: "row",
+        alignItems: "center",
+        flexWrap: "wrap",
         gap: 12,
     },
     workspaceCount: {
@@ -795,6 +777,16 @@ const styles = StyleSheet.create({
         color: palette.textMain,
         fontWeight: "700",
     },
+    secondaryIconButton: {
+        width: 44,
+        height: 44,
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 22,
+        backgroundColor: palette.surface,
+        borderWidth: 1,
+        borderColor: palette.border,
+    },
     primaryButton: {
         alignSelf: "flex-start",
         flexDirection: "row",
@@ -808,5 +800,13 @@ const styles = StyleSheet.create({
     primaryButtonText: {
         color: palette.white,
         fontWeight: "700",
+    },
+    primaryIconButton: {
+        width: 44,
+        height: 44,
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 22,
+        backgroundColor: palette.accent,
     },
 });

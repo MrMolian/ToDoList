@@ -513,6 +513,13 @@ select:focus-visible {
     font-weight: 700;
 }
 
+.workspace-section__heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
 .workspace-list {
     display: grid;
     gap: 12px;
