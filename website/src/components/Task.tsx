@@ -132,7 +132,7 @@ export default function TaskCard({
                                 {subTasks.length} subtask{subTasks.length > 1 ? "s" : ""}
                             </div>
                             <div className="task-card__subtask-list">
-                                {subTasks.slice(0, 3).map((subTask) => (
+                                {subTasks.map((subTask) => (
                                     <SubTask
                                         key={subTask.id}
                                         task={subTask}
