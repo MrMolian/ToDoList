@@ -122,7 +122,7 @@ export default function TaskCard({
                             </Text>
 
                             <View style={styles.subTaskList}>
-                                {subTasks.slice(0, 3).map((subTask) => (
+                                {subTasks.map((subTask) => (
                                     <SubTask
                                         key={subTask.id}
                                         task={subTask}
